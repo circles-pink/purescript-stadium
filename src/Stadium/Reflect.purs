@@ -6,6 +6,7 @@ import Data.Tuple.Nested ((/\), type (/\))
 import Prim.Boolean (True)
 import Prim.RowList (class RowToList, Cons, Nil, RowList)
 import Stadium.Type.Either (Right)
+import Stadium.Type.ErrorMsg (class FailOnLeft)
 import Stadium.Type.Protocol as P
 import Stadium.Type.StateMachine (StateMachine')
 import Stadium.Type.StateMachine as STM
@@ -34,7 +35,8 @@ type StateMachineData
 --------------------------------------------------------------------------------
 instance reflect' ::
   ( TypeEquals stm (STM.StateMachine (P.Protocol states) st ac)
-  , STM.Validate stm (Right True)
+  , STM.Validate stm r
+  , FailOnLeft r
   , RowToList states states'
   , MapStates states'
   ) =>
