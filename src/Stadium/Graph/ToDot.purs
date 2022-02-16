@@ -18,10 +18,12 @@ fromNode n = case n of
   G.State s ->
     { id: s.name
     , shape: D.Ellipse
+    , label: s.name
     }
   G.Action s ->
     { id: fromActionName s.name
     , shape: D.Box
+    , label: s.name.action
     }
 
 fromEdge :: G.Edge -> D.Edge

@@ -9,6 +9,7 @@ data Shape
 
 type Node
   = { id :: String
+    , label :: String
     , shape :: Shape
     }
 
@@ -38,7 +39,14 @@ fromEdge :: Edge -> String
 fromEdge e = "  " <> show e.from <> " -> " <> show e.to <> ";\n"
 
 fromNode :: Node -> String
-fromNode n = "  " <> show n.id <> " [shape=" <> fromShape n.shape <> "];\n"
+fromNode n =
+  "  " <> show n.id
+    <> " [shape="
+    <> fromShape n.shape
+    <> ", "
+    <> "label="
+    <> show n.label
+    <> "];\n"
 
 fromShape :: Shape -> String
 fromShape s = case s of
