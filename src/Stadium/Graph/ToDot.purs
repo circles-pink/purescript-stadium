@@ -21,7 +21,7 @@ fromNode n = case n of
     }
   G.Action s ->
     { id: fromActionName s.name
-    , shape: D.Ellipse
+    , shape: D.Box
     }
 
 fromEdge :: G.Edge -> D.Edge
