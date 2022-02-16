@@ -51,7 +51,7 @@ check = STM.validate (Proxy :: _ MyStateMachine)
 
 main :: Effect Unit
 main =
-  G.fromStateMachine (Proxy :: _ MyStateMachine)
+  G.fromStateMachine "MyGraph" (Proxy :: _ MyStateMachine)
     # G.graphToDot
     # D.toString
     # log
