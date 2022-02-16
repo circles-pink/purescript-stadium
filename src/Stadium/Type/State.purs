@@ -4,9 +4,11 @@ import Prelude
 import Data.Variant (Variant)
 import Prim.Boolean (True)
 import Prim.Row (class Cons)
+import Prim.TypeError (Beside, QuoteLabel, Text)
 import Stadium.Class.KeysOf (class KeysOf)
 import Stadium.Class.SubsetOf (class SubsetOf)
 import Stadium.Type.Either (class First, class LMap, Either, Left, Right)
+import Stadium.Type.ErrorMsg (class ToErrorMsg, type (:|:), Msg, TickText)
 import Stadium.Type.Protocol (Protocol, Protocol')
 import Stadium.Type.Protocol as P
 import Type.Data.List (List')
@@ -14,6 +16,9 @@ import Type.Proxy (Proxy(..))
 
 type State
   = Type
+
+type StateName
+  = Symbol
 
 --------------------------------------------------------------------------------
 -- class GetSubState
@@ -41,6 +46,12 @@ foreign import data ErrMustBeVariant :: Error
 foreign import data ErrMissingKey :: Symbol -> Error
 
 foreign import data ErrExtraKey :: Symbol -> Error
+
+instance toDocErrMustBeVariant :: ToErrorMsg ErrMustBeVariant (Msg (Text "type must be a " :|: TickText "Variant" :|: Text " type."))
+
+instance toDocErrMissingKey :: ToErrorMsg (ErrMissingKey s) (Msg (Text "Key " :|: TickText s :|: Text " must be defined."))
+
+instance toDocErrErrExtraKey :: ToErrorMsg (ErrExtraKey s) (Msg (Text "Key " :|: TickText s :|: Text " should not be defined."))
 
 --------------------------------------------------------------------------------
 -- class Validate

@@ -4,10 +4,12 @@ import Prelude
 import Data.Foldable (fold)
 import Data.Variant (Variant)
 import Prim.Boolean (True)
+import Prim.TypeError (Above, Text)
 import Stadium.Class.All (class All)
 import Stadium.Type.Action (Action)
 import Stadium.Type.Action as A
 import Stadium.Type.Either (class First3, class LMap, Either, Right)
+import Stadium.Type.ErrorMsg (class ToErrorMsg, Msg, Scope)
 import Stadium.Type.Protocol (Protocol, Protocol')
 import Stadium.Type.Protocol as P
 import Stadium.Type.State (State)
@@ -29,6 +31,12 @@ foreign import data ErrProtocol :: P.Error -> Error
 foreign import data ErrState :: S.Error -> Error
 
 foreign import data ErrAction :: A.Error -> Error
+
+instance toErrorMsgErrProtocol :: (ToErrorMsg a b) => ToErrorMsg (ErrProtocol a) (Scope "Protocol type" b)
+
+instance toErrorMsgErrState :: (ToErrorMsg a b) => ToErrorMsg (ErrState a) (Scope "State type" b)
+
+instance toErrorMsgErrAction :: (ToErrorMsg a b) => ToErrorMsg (ErrAction a) (Scope "Action type" b)
 
 --------------------------------------------------------------------------------
 -- class Validate

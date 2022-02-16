@@ -3,10 +3,9 @@ module Stadium.Type.Protocol.Validate where
 import Prelude
 import Prim.Boolean (True)
 import Prim.RowList (class RowToList, Cons, Nil, RowList)
-import Prim.TypeError (class Warn)
 import Stadium.Type.Either (class First, Either, Right, Left)
 import Stadium.Type.Protocol.Error (Error)
-import Stadium.Type.Protocol.Error (class ToDoc, ErrInvalidTargetState)
+import Stadium.Type.Protocol.Error (ErrInvalidTargetState)
 import Stadium.Type.Protocol.GetKeys (class GetKeys)
 import Stadium.Type.Protocol.Type (Protocol, Protocol', State, State', Action, Action', type (<:))
 import Type.Data.Boolean (class If)
