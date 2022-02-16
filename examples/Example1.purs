@@ -1,11 +1,21 @@
-module Example1 where
+module Example1
+  ( MyAction
+  , MyProtocol
+  , MyState
+  , check
+  , main
+  ) where
 
 import Prelude
 import Data.Variant (Variant)
+import Effect (Effect)
+import Effect.Class.Console (log)
 import Stadium.Type.Protocol as P
 import Stadium.Type.StateMachine as STM
 import Type.Data.List (type (:>), Nil')
 import Type.Proxy (Proxy(..))
+import Stadium.Graph as G
+import Dot as D
 
 type MyState
   = Variant
@@ -38,3 +48,10 @@ type MyStateMachine
 
 check :: Unit
 check = STM.validate (Proxy :: _ MyStateMachine)
+
+main :: Effect Unit
+main =
+  G.fromStateMachine (Proxy :: _ MyStateMachine)
+    # G.graphToDot
+    # D.toString
+    # log

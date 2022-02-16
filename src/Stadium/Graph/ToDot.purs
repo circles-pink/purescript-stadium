@@ -1,10 +1,10 @@
-module Stadium.Graph.Dot
+module Stadium.Graph.ToDot
   ( graphToDot
   ) where
 
 import Prelude
 import Dot as D
-import Stadium.Graph as G
+import Stadium.Graph.Type as G
 
 graphToDot :: G.Graph -> D.Dot
 graphToDot g =

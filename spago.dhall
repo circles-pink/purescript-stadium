@@ -12,7 +12,8 @@ to generate this file without the comments in this block.
 -}
 { name = "stadium"
 , dependencies =
-  [ "console"
+  [ "arrays"
+  , "console"
   , "effect"
   , "foldable-traversable"
   , "maybe"
@@ -20,12 +21,12 @@ to generate this file without the comments in this block.
   , "psci-support"
   , "test-unit"
   , "tuples"
+  , "type-equality"
   , "typelevel-lists"
   , "typelevel-prelude"
   , "undefined"
   , "unsafe-coerce"
   , "variant"
-  , "type-equality"
   ]
 , packages = ./packages.dhall
 , sources = [ "./src/**/*.purs", "./test/**/*.purs", "./examples/**/*.purs" ]

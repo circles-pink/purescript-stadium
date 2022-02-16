@@ -1,23 +1,7 @@
-module Stadium.Graph where
+module Stadium.Graph
+  ( module Exp
+  ) where
 
-type StateName
-  = String
-
-type ActionName
-  = { state :: StateName
-    , action :: String
-    }
-
-data Node
-  = Action { name :: ActionName }
-  | State { name :: StateName }
-
-data Edge
-  = ToState { fromAction :: ActionName, toState :: StateName }
-  | ToAction { fromState :: StateName, toAction :: ActionName }
-
-type Graph
-  = { name :: String
-    , nodes :: Array Node
-    , edges :: Array Edge
-    }
+import Stadium.Graph.Type as Exp
+import Stadium.Graph.ToDot as Exp
+import Stadium.Graph.FromStateMachine as Exp
