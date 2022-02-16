@@ -9,12 +9,13 @@ import Stadium.Class.All (class All)
 import Stadium.Type.Action (Action)
 import Stadium.Type.Action as A
 import Stadium.Type.Either (class First3, class LMap, Either, Right)
-import Stadium.Type.ErrorMsg (class ToErrorMsg, Msg, Scope)
+import Stadium.Type.ErrorMsg (class FailOnLeft, class ToErrorMsg, Msg, Scope)
 import Stadium.Type.Protocol (Protocol, Protocol')
 import Stadium.Type.Protocol as P
 import Stadium.Type.State (State)
 import Stadium.Type.State as S
 import Type.Data.List (type (:>), Nil')
+import Type.Equality (class TypeEquals)
 import Type.Proxy (Proxy(..))
 
 data StateMachine'
@@ -41,7 +42,7 @@ instance toErrorMsgErrAction :: (ToErrorMsg a b) => ToErrorMsg (ErrAction a) (Sc
 --------------------------------------------------------------------------------
 -- class Validate
 --------------------------------------------------------------------------------
-instance validate ::
+instance validate' ::
   ( P.Validate ptc o1
   , S.Validate ptc st o2
   , A.Validate ptc ac o3
@@ -54,6 +55,13 @@ instance validate ::
 
 class Validate :: StateMachine' -> Either Error Boolean -> Constraint
 class Validate stm o | stm -> o
+
+validate ::
+  forall stm ptc st ac r.
+  TypeEquals stm (StateMachine ptc st ac) =>
+  Validate stm r =>
+  FailOnLeft r => Proxy stm -> Unit
+validate _ = unit
 
 --------------------------------------------------------------------------------
 -- Tests

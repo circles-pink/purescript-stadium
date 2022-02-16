@@ -31,7 +31,7 @@ instance mkControl' ::
   , TypeEquals ctlS (ControlSpec st ac m)
   , TypeEquals o (Control st ac m)
   ) =>
-  Foo stm ctlS o where
+  MkControl stm ctlS o where
   mk _ _ = undefined
 
 class MkControl :: STM.StateMachine' -> Type -> Type -> Constraint
