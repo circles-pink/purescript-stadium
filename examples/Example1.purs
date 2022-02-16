@@ -8,14 +8,15 @@ module Example1
 
 import Prelude
 import Data.Variant (Variant)
+import Dot as D
 import Effect (Effect)
 import Effect.Class.Console (log)
+import Stadium.Graph as G
+import Stadium.Reflect as R
 import Stadium.Type.Protocol as P
 import Stadium.Type.StateMachine as STM
 import Type.Data.List (type (:>), Nil')
 import Type.Proxy (Proxy(..))
-import Stadium.Graph as G
-import Dot as D
 
 type MyState
   = Variant
@@ -51,7 +52,8 @@ check = STM.validate (Proxy :: _ MyStateMachine)
 
 main :: Effect Unit
 main =
-  G.fromStateMachine "MyGraph" (Proxy :: _ MyStateMachine)
+  R.reflectStateMachine (Proxy :: _ MyStateMachine)
+    # G.fromStateMachineData "MyGraph"
     # G.graphToDot
     # D.toString
     # log
