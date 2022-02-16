@@ -10,7 +10,8 @@ import Prelude
 import Data.Variant (Variant)
 import Dot as D
 import Effect (Effect)
-import Effect.Class.Console (log)
+import Node.Encoding (Encoding(..))
+import Node.FS.Sync (writeTextFile)
 import Stadium.Graph as G
 import Stadium.Reflect as R
 import Stadium.Type.Protocol as P
@@ -56,4 +57,4 @@ main =
     # G.fromStateMachineData "MyGraph"
     # G.graphToDot
     # D.toString
-    # log
+    # writeTextFile UTF8 "example-dist/example-graph.dot"

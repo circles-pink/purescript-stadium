@@ -17,6 +17,8 @@ to generate this file without the comments in this block.
   , "effect"
   , "foldable-traversable"
   , "maybe"
+  , "node-buffer"
+  , "node-fs"
   , "prelude"
   , "psci-support"
   , "test-unit"

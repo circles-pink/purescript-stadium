@@ -1,18 +1,24 @@
 module Stadium.Graph.FromStateMachine where
 
 import Prelude
-import Prim.Boolean (True)
-import Prim.RowList (class RowToList, Cons, Nil, RowList)
+import Data.Tuple.Nested (type (/\), (/\))
 import Stadium.Graph.Type as G
 import Stadium.Reflect as R
-import Stadium.Type.Either (Right)
-import Stadium.Type.Protocol as P
-import Stadium.Type.StateMachine (StateMachine')
-import Stadium.Type.StateMachine as STM
-import Stadium.Type.Tuple (type (/\))
-import Type.Equality (class TypeEquals)
-import Type.Proxy (Proxy(..))
-import Undefined (undefined)
+
+type Graph'
+  = { nodes :: Array G.Node
+    , edges :: Array G.Edge
+    }
 
 fromStateMachineData :: String -> R.StateMachineData -> G.Graph
-fromStateMachineData _ = undefined
+fromStateMachineData n sd =
+  { name: n
+  , nodes: findStateNodes sd
+  , edges: []
+  }
+
+findStateNodes :: R.StateMachineData -> Array G.Node
+findStateNodes sd = map findStateNode sd
+
+findStateNode :: String /\ R.StateData -> G.Node
+findStateNode (name /\ _) = G.State { name }
