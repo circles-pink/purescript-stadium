@@ -1,10 +1,4 @@
-module Example1
-  ( MyAction
-  , MyProtocol
-  , MyState
-  , check
-  , main
-  ) where
+module Example1 where
 
 import Prelude
 import Data.Variant (Variant)
@@ -52,10 +46,15 @@ type MyStateMachine
 check :: Unit
 check = STM.validate (Proxy :: _ MyStateMachine)
 
-myControl :: forall m. C.Control MyState MyAction m
+myControl :: forall m. Monad m => (MyState -> m Unit) -> MyAction -> MyState -> m Unit
 myControl =
   C.mkControl (Proxy :: _ MyStateMachine)
-    {}
+    { state1:
+        { action1: \_ _ _ -> pure unit
+        , action2: \_ _ _ -> pure unit
+        }
+    , state2: {}
+    }
 
 main :: Effect Unit
 main =
