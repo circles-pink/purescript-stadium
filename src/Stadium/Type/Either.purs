@@ -13,6 +13,7 @@ module Stadium.Type.Either
   , class First3
   , class Match
   , class LMap
+  , class Default
   , testsFirst
   , testsMatch
   ) where
@@ -30,13 +31,9 @@ foreign import data Right :: forall a b. b -> Either a b
 --------------------------------------------------------------------------------
 -- class First
 --------------------------------------------------------------------------------
-instance firstRightRight :: First (Right b1) (Right b2) (Right b1)
+instance firstRightRight :: First (Right b) rhs rhs
 
-instance firstRightLeft :: First (Right b1) (Left a) (Left a)
-
-instance firstLeftRight :: First (Left a) (Right b) (Left a)
-
-instance firstLeftLeft :: First (Left a1) (Left a2) (Left a1)
+instance firstRightLeft :: First (Left a) rhs (Left a)
 
 class First :: forall a b. Either a b -> Either a b -> Either a b -> Constraint
 class First e1 e2 o | e1 e2 -> o
@@ -63,6 +60,16 @@ instance matchRight :: Match (Right b) onLeft onRight (onRight b)
 
 class Match :: forall a b z. Either a b -> (a -> z) -> (b -> z) -> z -> Constraint
 class Match e onLeft onRight o | e onLeft onRight -> o
+
+--------------------------------------------------------------------------------
+-- class Default
+--------------------------------------------------------------------------------
+instance defaultLeft :: Default (Left a) onLeft onLeft
+
+instance defaultRight :: Default (Right b) onLeft b
+
+class Default :: forall a b z. Either a b -> b -> b -> Constraint
+class Default e onLeft o | e onLeft -> o
 
 --------------------------------------------------------------------------------
 -- class Lmap
@@ -99,7 +106,7 @@ testsFirst =
     <> testFirst
         (Proxy :: _ (Right B1))
         (Proxy :: _ (Right B2))
-        (Proxy :: _ (Right B1))
+        (Proxy :: _ (Right B2))
     <> testFirst
         (Proxy :: _ (Right B))
         (Proxy :: _ (Left A))
@@ -147,3 +154,18 @@ testsLMap =
   where
   testLMap :: forall a b c. LMap a b c => Proxy a -> Proxy b -> Proxy c -> Unit
   testLMap _ _ _ = unit
+
+testsDefault :: Unit
+testsDefault =
+  unit
+    <> testDefault
+        (Proxy :: _ (Left A))
+        (Proxy :: _ B)
+        (Proxy :: _ B)
+    <> testDefault
+        (Proxy :: _ (Right A))
+        (Proxy :: _ B)
+        (Proxy :: _ A)
+  where
+  testDefault :: forall a b c. Default a b c => Proxy a -> Proxy b -> Proxy c -> Unit
+  testDefault _ _ _ = unit

@@ -6,14 +6,16 @@ import Prim.Boolean (True)
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, RowList, Cons, Nil)
 import Prim.TypeError (Text)
+import Stadium.Class.Get (class Get)
 import Stadium.Class.KeysOf (class KeysOf)
 import Stadium.Class.SubsetOf (class SubsetOf)
-import Stadium.Type.Either (class First, class LMap, Either, Left, Right)
+import Stadium.Type.Either (class Default, class First, class LMap, Either, Left, Right)
 import Stadium.Type.ErrorMsg (class ToErrorMsg, type (:|:), Msg, Scope, TickText)
 import Stadium.Type.Protocol (Protocol, Protocol')
 import Stadium.Type.Protocol as P
 import Stadium.Util (type ($), type (<<<))
 import Type.Data.List (List', Nil')
+import Type.Equality (class TypeEquals)
 import Type.Proxy (Proxy(..))
 
 type Action
@@ -128,8 +130,11 @@ class ValidateSubStates ptc ac o | ptc ac -> o
 --------------------------------------------------------------------------------
 instance validateSubState ::
   ( KeysOf v ksA
-  , P.GetState ptc s (P.State st)
-  , KeysOf st ksP
+  , TypeEquals ptc (Protocol ptc')
+  , Get ptc' s r
+  , Default r (P.State ()) st'
+  , TypeEquals st' (P.State st'')
+  , KeysOf st'' ksP
   , SubsetOf ksP ksA r1
   , SubsetOf ksA ksP r2
   , LMap r1 ErrMissingKey o1
@@ -166,36 +171,24 @@ testsValidate =
         (Proxy :: _ $ Variant ( foo :: Int ))
         (Proxy :: _ $ Left $ ErrExtraKey "foo")
     <> testValidate
-        ( Proxy ::
-            _ $ P.Protocol ( state1 :: P.State ( action1 :: P.Action Nil' ) )
-        )
-        ( Proxy ::
-            _ $ Variant ( state1 :: Int )
-        )
+        (Proxy :: _ $ Protocol ())
+        (Proxy :: _ $ Variant ( foo :: (Variant ()) ))
+        (Proxy :: _ $ Left $ ErrExtraKey "foo")
+    <> testValidate
+        (Proxy :: _ $ P.Protocol ( state1 :: P.State ( action1 :: P.Action Nil' ) ))
+        (Proxy :: _ $ Variant ( state1 :: Int ))
         (Proxy :: _ $ Left $ ErrAction "state1" $ ErrMustBeVariant)
     <> testValidate
-        ( Proxy ::
-            _ $ P.Protocol ( state1 :: P.State ( action1 :: P.Action Nil' ) )
-        )
-        ( Proxy ::
-            _ $ Variant ( state1 :: Variant ( action1 :: Int ) )
-        )
+        (Proxy :: _ $ P.Protocol ( state1 :: P.State ( action1 :: P.Action Nil' ) ))
+        (Proxy :: _ $ Variant ( state1 :: Variant ( action1 :: Int ) ))
         (Proxy :: _ (Right True))
     <> testValidate
-        ( Proxy ::
-            _ $ P.Protocol ( state1 :: P.State ( action1 :: P.Action Nil', action2 :: P.Action Nil' ) )
-        )
-        ( Proxy ::
-            _ $ Variant ( state1 :: Variant ( action1 :: Int ) )
-        )
+        (Proxy :: _ $ P.Protocol ( state1 :: P.State ( action1 :: P.Action Nil', action2 :: P.Action Nil' ) ))
+        (Proxy :: _ $ Variant ( state1 :: Variant ( action1 :: Int ) ))
         (Proxy :: _ $ Left $ ErrAction "state1" $ ErrMissingKey "action2")
     <> testValidate
-        ( Proxy ::
-            _ $ P.Protocol ( state1 :: P.State ( action1 :: P.Action Nil' ) )
-        )
-        ( Proxy ::
-            _ $ Variant ( state1 :: Variant ( action1 :: Int, action2 :: Int ) )
-        )
+        (Proxy :: _ $ P.Protocol ( state1 :: P.State ( action1 :: P.Action Nil' ) ))
+        (Proxy :: _ $ Variant ( state1 :: Variant ( action1 :: Int, action2 :: Int ) ))
         (Proxy :: _ $ Left $ ErrAction "state1" $ ErrExtraKey "action2")
   where
   testValidate :: forall a b c. Validate a b c => Proxy a -> Proxy b -> Proxy c -> Unit

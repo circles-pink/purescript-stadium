@@ -3,6 +3,7 @@ module Stadium.Type.Protocol.Ops where
 import Prelude
 import Data.Foldable (fold)
 import Prim.Row (class Cons)
+import Stadium.Type.Either (Either)
 import Stadium.Type.Protocol.Type (Action', Protocol, Protocol', State, State', Action)
 import Type.Data.List (type (:>), Nil')
 import Type.Proxy (Proxy(..))
