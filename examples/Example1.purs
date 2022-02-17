@@ -46,7 +46,7 @@ type MyStateMachine
 check :: Unit
 check = STM.validate (Proxy :: _ MyStateMachine)
 
-myControl :: forall m. Monad m => (MyState -> m Unit) -> MyAction -> MyState -> m Unit
+myControl :: forall m. Monad m => (MyState -> m Unit) -> MyState -> MyAction -> m Unit
 myControl =
   C.mkControl (Proxy :: _ MyStateMachine)
     { state1:

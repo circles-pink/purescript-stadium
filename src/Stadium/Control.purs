@@ -24,7 +24,7 @@ type ControlSpec st ac m
   = Unit
 
 type Control st ac m
-  = (st -> m Unit) -> ac -> st -> m Unit
+  = (st -> m Unit) -> st -> ac -> m Unit
 
 --------------------------------------------------------------------------------
 -- class GenControlSpec
@@ -85,7 +85,9 @@ instance mkControl' ::
   , GenControlSpec m stm ctlS
   ) =>
   MkControl stm ctlS o where
-  mkControl _ _ = undefined
+  mkControl _ = mkControlImpl
+
+foreign import mkControlImpl :: forall a. a
 
 class MkControl :: STM.StateMachine' -> Type -> Type -> Constraint
 class MkControl stm ctlS ctl | stm -> ctl ctlS where
