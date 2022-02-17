@@ -4,4 +4,4 @@ import Prelude
 
 data Unit'
 
-foreign import data Unit :: Unit'
+foreign import data MkUnit :: Unit'
