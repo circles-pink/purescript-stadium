@@ -3,6 +3,7 @@ module Stadium.Control where
 import Prelude
 import Data.Array (fold)
 import Data.Variant (Variant)
+import Effect (Effect)
 import Prim.Boolean (True)
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, Cons, Nil, RowList)
@@ -14,6 +15,7 @@ import Stadium.Type.State as S
 import Stadium.Type.StateMachine (StateMachine, StateMachine')
 import Stadium.Type.StateMachine as STM
 import Stadium.Type.Tuple (Tuple)
+import Type.Data.List (Nil')
 import Type.Equality (class TypeEquals)
 import Type.Proxy (Proxy(..))
 import Undefined (undefined)
@@ -28,30 +30,49 @@ type Control st ac m
 -- class GenControlSpec
 --------------------------------------------------------------------------------
 instance genControlSpec ::
-  ( GenControlSpec' sts' r
+  ( GenStates m stm sts' r
   , RowToList sts sts'
   , TypeEquals stm (StateMachine (P.Protocol sts) st ac)
   , STM.Validate stm res
   , FailOnLeft res
   ) =>
-  GenControlSpec stm (Record r)
+  GenControlSpec m stm (Record r)
 
-class GenControlSpec :: StateMachine' -> Type -> Constraint
-class GenControlSpec stm ctlS | stm -> ctlS
+class GenControlSpec :: (Type -> Type) -> StateMachine' -> Type -> Constraint
+class GenControlSpec m stm ctlS | stm -> ctlS
 
 --------------------------------------------------------------------------------
--- class GenControlSpec'
+-- class GenStates
 --------------------------------------------------------------------------------
-instance genControlSpec'Nil :: GenControlSpec' Nil ()
+instance genStatesNil :: GenStates m stm Nil ()
 
-instance genControlSpec'Cons ::
-  ( GenControlSpec' tail r'
-  , Cons s Unit r' r
+instance genStatesCons ::
+  ( GenStates m stm tail r'
+  , Cons s (Record a) r' r
+  , RowToList ac ac'
+  , GenActions m stm s ac' a
   ) =>
-  GenControlSpec' (Cons s t tail) r
+  GenStates m stm (Cons s (P.State ac) tail) r
 
-class GenControlSpec' :: RowList P.State' -> Row Type -> Constraint
-class GenControlSpec' sts ctlS | sts -> ctlS
+class GenStates :: (Type -> Type) -> StateMachine' -> RowList P.State' -> Row Type -> Constraint
+class GenStates m stm sts ctlS | sts -> ctlS
+
+--------------------------------------------------------------------------------
+-- class GenActions
+--------------------------------------------------------------------------------
+instance genActionsNil :: GenActions m stm sn Nil ()
+
+instance genActionsCons ::
+  ( GenActions m stm sn tail r'
+  , Cons s ((tgSt -> m Unit) -> stData -> acData -> m Unit) r' r
+  , STM.GetStateData stm sn stData
+  , STM.GetActionData stm sn s acData
+  , STM.GetTargetState stm sn s tgSt
+  ) =>
+  GenActions m stm sn (Cons s t tail) r
+
+class GenActions :: (Type -> Type) -> StateMachine' -> P.StateName -> RowList P.Action' -> Row Type -> Constraint
+class GenActions m stm sn acs ctlS | acs -> ctlS
 
 --------------------------------------------------------------------------------
 -- class MkControl
@@ -61,7 +82,7 @@ instance mkControl' ::
   , STM.Validate stm r
   , FailOnLeft r
   , TypeEquals stm (StateMachine ptc st ac)
-  , GenControlSpec stm ctlS
+  , GenControlSpec m stm ctlS
   ) =>
   MkControl stm ctlS o where
   mkControl _ _ = undefined
@@ -73,14 +94,30 @@ class MkControl stm ctlS ctl | stm -> ctl ctlS where
 --------------------------------------------------------------------------------
 -- Tests
 --------------------------------------------------------------------------------
+data S1
+
+data S2
+
+data S1_A1
+
 type MyState
-  = Variant ( state1 :: Int )
+  = Variant ( state1 :: S1 )
 
 type MyAction
-  = Variant ( state1 :: Variant () )
+  = Variant
+      ( state1 ::
+          Variant
+            ( action1 :: S1_A1
+            )
+      )
 
 type MyProtocol
-  = P.Protocol ( state1 :: P.State () )
+  = P.Protocol
+      ( state1 ::
+          P.State
+            ( action1 :: P.Action Nil'
+            )
+      )
 
 type MyStateMachine
   = STM.StateMachine MyProtocol MyState MyAction
@@ -89,15 +126,18 @@ tests :: Unit
 tests =
   fold
     [ let
-        test :: forall a1 a2. GenControlSpec a1 a2 => Proxy a1 -> Proxy a2 -> Unit
-        test _ _ = unit
+        test :: forall a1 a2 a3. GenControlSpec a1 a2 a3 => Proxy a1 -> Proxy a2 -> Proxy a3 -> Unit
+        test _ _ _ = unit
       in
         fold
           [ test
+              (Proxy :: _ Effect)
               (Proxy :: _ MyStateMachine)
               ( Proxy ::
                   _
-                    { state1 :: {}
+                    { state1 ::
+                        { action1 :: (Variant () -> Effect Unit) -> S1 -> S1_A1 -> Effect Unit
+                        }
                     }
               )
           ]
