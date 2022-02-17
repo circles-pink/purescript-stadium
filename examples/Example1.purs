@@ -12,6 +12,7 @@ import Dot as D
 import Effect (Effect)
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync (writeTextFile)
+import Stadium.Control as C
 import Stadium.Graph as G
 import Stadium.Reflect as R
 import Stadium.Type.Protocol as P
@@ -50,6 +51,11 @@ type MyStateMachine
 
 check :: Unit
 check = STM.validate (Proxy :: _ MyStateMachine)
+
+myControl :: forall m. C.Control MyState MyAction m
+myControl =
+  C.mkControl (Proxy :: _ MyStateMachine)
+    {}
 
 main :: Effect Unit
 main =

@@ -17,6 +17,7 @@ import Stadium.Type.State as S
 import Type.Data.List (type (:>), Nil')
 import Type.Equality (class TypeEquals)
 import Type.Proxy (Proxy(..))
+import Stadium.Util (type ($))
 
 data StateMachine'
 
@@ -33,11 +34,17 @@ foreign import data ErrState :: S.Error -> Error
 
 foreign import data ErrAction :: A.Error -> Error
 
-instance toErrorMsgErrProtocol :: (ToErrorMsg a b) => ToErrorMsg (ErrProtocol a) (Scope "Protocol type" b)
+instance toErrorMsgErrProtocol ::
+  (ToErrorMsg a b) =>
+  ToErrorMsg (ErrProtocol a) (Scope "StateMachine" $ Scope "Protocol type" b)
 
-instance toErrorMsgErrState :: (ToErrorMsg a b) => ToErrorMsg (ErrState a) (Scope "State type" b)
+instance toErrorMsgErrState ::
+  (ToErrorMsg a b) =>
+  ToErrorMsg (ErrState a) (Scope "StateMachine" $ Scope "State type" b)
 
-instance toErrorMsgErrAction :: (ToErrorMsg a b) => ToErrorMsg (ErrAction a) (Scope "Action type" b)
+instance toErrorMsgErrAction ::
+  (ToErrorMsg a b) =>
+  ToErrorMsg (ErrAction a) (Scope "StateMachine" $ Scope "Action type" b)
 
 --------------------------------------------------------------------------------
 -- class Validate
