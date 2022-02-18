@@ -1,8 +1,9 @@
 module Stadium.Control where
 
 import Prelude
+import Control.Monad.State (State, execState, put)
 import Data.Array (fold)
-import Data.Variant (Variant)
+import Data.Variant (Variant, inj)
 import Effect (Effect)
 import Prim.Boolean (True)
 import Prim.Row (class Cons)
@@ -15,13 +16,12 @@ import Stadium.Type.State as S
 import Stadium.Type.StateMachine (StateMachine, StateMachine')
 import Stadium.Type.StateMachine as STM
 import Stadium.Type.Tuple (Tuple)
-import Type.Data.List (Nil')
+import Test.Unit as T
+import Test.Unit.Assert as A
+import Type.Data.List (type (:>), Nil')
 import Type.Equality (class TypeEquals)
 import Type.Proxy (Proxy(..))
 import Undefined (undefined)
-
-type ControlSpec st ac m
-  = Unit
 
 type Control st ac m
   = (st -> m Unit) -> st -> ac -> m Unit
@@ -96,20 +96,17 @@ class MkControl stm ctlS ctl | stm -> ctl ctlS where
 --------------------------------------------------------------------------------
 -- Tests
 --------------------------------------------------------------------------------
-data S1
-
-data S2
-
-data S1_A1
-
 type MyState
-  = Variant ( state1 :: S1 )
+  = Variant ( state1 :: Int )
+
+myInit :: MyState
+myInit = inj (Proxy :: _ "state1") 0
 
 type MyAction
   = Variant
       ( state1 ::
           Variant
-            ( action1 :: S1_A1
+            ( action1 :: Int
             )
       )
 
@@ -117,15 +114,15 @@ type MyProtocol
   = P.Protocol
       ( state1 ::
           P.State
-            ( action1 :: P.Action Nil'
+            ( action1 :: P.Action ("state1" :> Nil')
             )
       )
 
 type MyStateMachine
   = STM.StateMachine MyProtocol MyState MyAction
 
-tests :: Unit
-tests =
+tests' :: Unit
+tests' =
   fold
     [ let
         test :: forall a1 a2 a3. GenControlSpec a1 a2 a3 => Proxy a1 -> Proxy a2 -> Proxy a3 -> Unit
@@ -138,9 +135,45 @@ tests =
               ( Proxy ::
                   _
                     { state1 ::
-                        { action1 :: (Variant () -> Effect Unit) -> S1 -> S1_A1 -> Effect Unit
+                        { action1 ::
+                            (Variant ( state1 :: Int ) -> Effect Unit) ->
+                            Int ->
+                            Int ->
+                            Effect Unit
                         }
                     }
               )
           ]
     ]
+
+tests :: T.TestSuite
+tests =
+  T.suite "Stadium.Control" do
+    T.test "mkControl" do
+      let
+        myControl :: forall m. Monad m => (MyState -> m Unit) -> MyState -> MyAction -> m Unit
+        myControl =
+          mkControl (Proxy :: _ MyStateMachine)
+            { state1:
+                { action1:
+                    \setState s a -> setState $ _state1 (s + a)
+                }
+            }
+
+        _action1 = inj (Proxy :: _ "action1")
+
+        _state1 = inj (Proxy :: _ "state1")
+
+        _state1' = inj (Proxy :: _ "state1")
+
+        _state2 = inj (Proxy :: _ "state2")
+
+        x :: State MyState Unit
+        x = myControl put (_state1 5) (_state1' $ _action1 10)
+
+        y :: MyState
+        y = execState x myInit
+
+        z :: MyState
+        z = _state1 15
+      A.equal y z
