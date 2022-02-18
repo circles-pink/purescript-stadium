@@ -1,7 +1,7 @@
 module Example1 where
 
 import Prelude
-import Data.Variant (Variant)
+import Data.Variant (Variant, inj)
 import Dot as D
 import Effect (Effect)
 import Node.Encoding (Encoding(..))
@@ -46,16 +46,51 @@ type MyStateMachine
 check :: Unit
 check = STM.validate (Proxy :: _ MyStateMachine)
 
+_state1 :: forall a v. a -> Variant ( state1 :: a | v )
+_state1 = inj (Proxy :: _ "state1")
+
 myControl :: forall m. Monad m => (MyState -> m Unit) -> MyState -> MyAction -> m Unit
 myControl =
   C.mkControl (Proxy :: _ MyStateMachine)
     { state1:
-        { action1: \_ _ _ -> pure unit
-        , action2: \_ _ _ -> pure unit
+        { action1:
+            \setState _ _ -> do
+              pure unit
+        , action2:
+            \setState _ _ -> do
+              -- setState (inj (Proxy :: _ "state1") 12)
+              -- setState.state1 12
+              -- setState (inj _state1 12)
+              -- setState (inj (Proxy :: _ "state2") "foo")
+              -- setState $ T.state1 12 
+              pure unit
         }
     , state2: {}
     }
 
+type Surface a
+  = { title :: String
+    , text :: String
+    , prompt :: String
+    , input :: String -> a
+    }
+
+--type RS a = (a -> Unit) ->
+-- myView :: MyState -> Surface MyAction
+-- myView =
+--   mkView (Proxy :: _ MyStateMachine)
+--     { state1:
+--         \_ ->
+--           { title: "Welcome"
+--           , text: "Are you ready?"
+--           , prompt: "y/n"
+--           , input:
+--               \i -> case i of
+--                 "y" -> _yes
+--                 "n" -> _no
+--                 _ -> _wrongInput
+--           }
+--     }
 main :: Effect Unit
 main =
   R.reflectStateMachine (Proxy :: _ MyStateMachine)
