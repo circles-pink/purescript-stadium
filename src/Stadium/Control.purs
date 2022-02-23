@@ -1,7 +1,7 @@
 module Stadium.Control where
 
 import Prelude
-import Control.Monad.State (State, execState, put)
+import Control.Monad.State (State, execState, modify, modify_, put)
 import Data.Array (fold)
 import Data.Variant (Variant, inj)
 import Effect (Effect)
@@ -24,7 +24,7 @@ import Type.Proxy (Proxy(..))
 import Undefined (undefined)
 
 type Control st ac m
-  = (st -> m Unit) -> st -> ac -> m Unit
+  = ((st -> st) -> m Unit) -> st -> ac -> m Unit
 
 --------------------------------------------------------------------------------
 -- class GenControlSpec
@@ -64,7 +64,7 @@ instance genActionsNil :: GenActions m stm sn Nil ()
 
 instance genActionsCons ::
   ( GenActions m stm sn tail r'
-  , Cons s ((tgSt -> m Unit) -> stData -> acData -> m Unit) r' r
+  , Cons s (((stData -> tgSt) -> m Unit) -> stData -> acData -> m Unit) r' r
   , STM.GetStateData stm sn stData
   , STM.GetActionData stm sn s acData
   , STM.GetTargetState stm sn s tgSt
@@ -136,7 +136,7 @@ tests' =
                   _
                     { state1 ::
                         { action1 ::
-                            (Variant ( state1 :: Int ) -> Effect Unit) ->
+                            ((Int -> Variant ( state1 :: Int )) -> Effect Unit) ->
                             Int ->
                             Int ->
                             Effect Unit
@@ -149,31 +149,39 @@ tests' =
 tests :: T.TestSuite
 tests =
   T.suite "Stadium.Control" do
-    T.test "mkControl" do
-      let
-        myControl :: forall m. Monad m => (MyState -> m Unit) -> MyState -> MyAction -> m Unit
-        myControl =
-          mkControl (Proxy :: _ MyStateMachine)
-            { state1:
-                { action1:
-                    \setState s a -> setState $ _state1 (s + a)
-                }
-            }
+    T.suite "mkControl" do
+      T.test "setState const" do
+        let
+          myControl :: forall m. Monad m => ((MyState -> MyState) -> m Unit) -> MyState -> MyAction -> m Unit
+          myControl =
+            mkControl (Proxy :: _ MyStateMachine)
+              { state1:
+                  { action1:
+                      \setState s a -> setState (\_ -> _state1 (s + a))
+                  }
+              }
 
-        _action1 = inj (Proxy :: _ "action1")
+          myStateM :: State MyState Unit
+          myStateM = myControl modify_ (_state1 5) (_state1' $ _action1 10)
+        A.equal (_state1 15) (execState myStateM myInit)
+  -- T.test "setState as function" do
+  --   let
+  --     myControl :: forall m. Monad m => ((MyState -> MyState) -> m Unit) -> MyState -> MyAction -> m Unit
+  --     myControl =
+  --       mkControl (Proxy :: _ MyStateMachine)
+  --         { state1:
+  --             { action1:
+  --                 \setState _ a -> setState (\s -> _state1 (s + a))
+  --             }
+  --         }
+  --     myStateM :: State MyState Unit
+  --     myStateM = myControl modify_ (_state1 5) (_state1' $ _action1 10)
+  --   A.equal (_state1 15) (execState myStateM myInit)
+  where
+  _action1 = inj (Proxy :: _ "action1")
 
-        _state1 = inj (Proxy :: _ "state1")
+  _state1 = inj (Proxy :: _ "state1")
 
-        _state1' = inj (Proxy :: _ "state1")
+  _state1' = inj (Proxy :: _ "state1")
 
-        _state2 = inj (Proxy :: _ "state2")
-
-        x :: State MyState Unit
-        x = myControl put (_state1 5) (_state1' $ _action1 10)
-
-        y :: MyState
-        y = execState x myInit
-
-        z :: MyState
-        z = _state1 15
-      A.equal y z
+  _state2 = inj (Proxy :: _ "state2")

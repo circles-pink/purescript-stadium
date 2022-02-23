@@ -35,7 +35,7 @@ type MyProtocol
       ( state1 ::
           P.State
             ( action1 :: P.Action Nil'
-            , action2 :: P.Action ("state2" :> "state1" :> Nil')
+            , action2 :: P.Action ("state2" :> Nil')
             )
       , state2 :: P.State ()
       )
@@ -46,10 +46,13 @@ type MyStateMachine
 check :: Unit
 check = STM.validate (Proxy :: _ MyStateMachine)
 
-_state1 :: forall a v. a -> Variant ( state1 :: a | v )
-_state1 = inj (Proxy :: _ "state1")
+_state1 :: forall a v. a -> Variant ( state2 :: a | v )
+_state1 = inj (Proxy :: _ "state2")
 
-myControl :: forall m. Monad m => (MyState -> m Unit) -> MyState -> MyAction -> m Unit
+__state1 :: Proxy "state2"
+__state1 = Proxy :: _ "state2"
+
+myControl :: forall m. Monad m => ((MyState -> MyState) -> m Unit) -> MyState -> MyAction -> m Unit
 myControl =
   C.mkControl (Proxy :: _ MyStateMachine)
     { state1:
@@ -58,6 +61,9 @@ myControl =
               pure unit
         , action2:
             \setState _ _ -> do
+              setState (\_ -> inj __state1 "sss")
+              setState (\_ -> _state1 "sss")
+              -- setState.state1 "foooo"
               -- setState (inj (Proxy :: _ "state1") 12)
               -- setState.state1 12
               -- setState (inj _state1 12)
@@ -90,7 +96,11 @@ type Surface a
 --                 "n" -> _no
 --                 _ -> _wrongInput
 --           }
---     }
+-- --     }
+-- type RS a
+--   = (a -> Unit) -> JSX
+stmProxy = Proxy :: _ MyStateMachine
+
 main :: Effect Unit
 main =
   R.reflectStateMachine (Proxy :: _ MyStateMachine)
