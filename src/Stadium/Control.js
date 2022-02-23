@@ -2,9 +2,9 @@ exports.mkControlImpl = function (spec) {
     return function (setState) {
         return function (st) {
             return function (ac) {
-                let setState_ = function (f) {
-                    let f_ = function (x) {
-                        return f(x.value)
+                var setState_ = function (f) {
+                    var f_ = function (_) {
+                        return f(st.value)
                     }
                     return setState(f_)
                 };
