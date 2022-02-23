@@ -164,19 +164,20 @@ tests =
           myStateM :: State MyState Unit
           myStateM = myControl modify_ (_state1 5) (_state1' $ _action1 10)
         A.equal (_state1 15) (execState myStateM myInit)
-  -- T.test "setState as function" do
-  --   let
-  --     myControl :: forall m. Monad m => ((MyState -> MyState) -> m Unit) -> MyState -> MyAction -> m Unit
-  --     myControl =
-  --       mkControl (Proxy :: _ MyStateMachine)
-  --         { state1:
-  --             { action1:
-  --                 \setState _ a -> setState (\s -> _state1 (s + a))
-  --             }
-  --         }
-  --     myStateM :: State MyState Unit
-  --     myStateM = myControl modify_ (_state1 5) (_state1' $ _action1 10)
-  --   A.equal (_state1 15) (execState myStateM myInit)
+      T.test "setState as function" do
+        let
+          myControl :: forall m. Monad m => ((MyState -> MyState) -> m Unit) -> MyState -> MyAction -> m Unit
+          myControl =
+            mkControl (Proxy :: _ MyStateMachine)
+              { state1:
+                  { action1:
+                      \setState _ a -> setState (\s -> _state1 (s + a))
+                  }
+              }
+
+          myStateM :: State MyState Unit
+          myStateM = myControl modify_ (_state1 5) (_state1' $ _action1 10)
+        A.equal (_state1 15) (execState myStateM myInit)
   where
   _action1 = inj (Proxy :: _ "action1")
 
