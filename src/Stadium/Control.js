@@ -3,7 +3,8 @@ exports.mkControlImpl = function (spec) {
         return function (st) {
             return function (ac) {
                 var setState_ = function (f) {
-                    var f_ = function (_) {
+                    var f_ = function (x) {
+                        console.log({ x, st, ac })
                         return f(st.value)
                     }
                     return setState(f_)
