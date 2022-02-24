@@ -16,6 +16,7 @@ to generate this file without the comments in this block.
   , "console"
   , "effect"
   , "foldable-traversable"
+  , "identity"
   , "maybe"
   , "node-buffer"
   , "node-fs"
