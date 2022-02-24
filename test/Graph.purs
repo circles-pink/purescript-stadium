@@ -4,7 +4,7 @@ import Prelude
 import Data.Variant (Variant)
 import Dot as D
 import Node.Encoding (Encoding(..))
-import Node.FS.Aff (readTextFile)
+import Node.FS.Aff (readTextFile, writeTextFile)
 import Stadium.Graph as G
 import Stadium.Reflect as R
 import Stadium.Type.Protocol as P
@@ -55,4 +55,5 @@ tests =
               # G.fromStateMachineData "MyGraph"
               # G.graphToDot
               # D.toString
+        writeTextFile UTF8 "test/golden/graph1-actual.dot" actual
         A.equal expected actual
