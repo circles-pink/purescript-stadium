@@ -1,7 +1,7 @@
 module Stadium.Control where
 
 import Prelude
-import Control.Monad.State (State, execState, modify, modify_, put)
+import Control.Monad.State (State, StateT(..), execState, get, modify_, put)
 import Data.Array (fold)
 import Data.Variant (Variant, inj)
 import Effect (Effect)
@@ -94,6 +94,14 @@ class MkControl stm ctlS ctl | stm -> ctl ctlS where
   mkControl :: Proxy stm -> ctlS -> ctl
 
 --------------------------------------------------------------------------------
+-- StateMonad
+--------------------------------------------------------------------------------
+toStateT :: forall st ac m. Monad m => Control st ac (StateT st m) -> ac -> StateT st m Unit
+toStateT ctl ac = do
+  st <- get
+  ctl modify_ st ac
+
+--------------------------------------------------------------------------------
 -- Tests
 --------------------------------------------------------------------------------
 type MyState
@@ -146,6 +154,12 @@ tests' =
           ]
     ]
 
+_state1 = inj (Proxy :: _ "state1")
+
+_state1_action1 = inj (Proxy :: _ "state1") <<< inj (Proxy :: _ "action1")
+
+_state2 = inj (Proxy :: _ "state2")
+
 tests :: T.TestSuite
 tests =
   T.suite "Stadium.Control" do
@@ -162,7 +176,7 @@ tests =
               }
 
           myStateM :: State MyState Unit
-          myStateM = myControl modify_ (_state1 5) (_state1' $ _action1 10)
+          myStateM = myControl modify_ (_state1 5) (_state1_action1 10)
         A.equal (_state1 15) (execState myStateM myInit)
       T.test "setState as function" do
         let
@@ -176,13 +190,5 @@ tests =
               }
 
           myStateM :: State MyState Unit
-          myStateM = myControl modify_ (_state1 5) (_state1' $ _action1 10)
+          myStateM = myControl modify_ (_state1 5) (_state1_action1 10)
         A.equal (_state1 15) (execState myStateM myInit)
-  where
-  _action1 = inj (Proxy :: _ "action1")
-
-  _state1 = inj (Proxy :: _ "state1")
-
-  _state1' = inj (Proxy :: _ "state1")
-
-  _state2 = inj (Proxy :: _ "state2")
