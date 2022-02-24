@@ -1,8 +1,18 @@
-module Stadium.Control where
+module Stadium.Control
+  ( Control
+  , class GenActions
+  , class GenControlSpec
+  , class GenStates
+  , class MkControl
+  , mkControl
+  , tests
+  , toStateT
+  ) where
 
 import Prelude
 import Control.Monad.State (State, StateT(..), execState, get, modify_, put)
 import Data.Array (fold)
+import Data.Identity (Identity(..))
 import Data.Variant (Variant, inj)
 import Effect (Effect)
 import Prim.Boolean (True)
@@ -129,6 +139,12 @@ type MyProtocol
 type MyStateMachine
   = STM.StateMachine MyProtocol MyState MyAction
 
+_state1 = inj (Proxy :: _ "state1")
+
+_state1_action1 = inj (Proxy :: _ "state1") <<< inj (Proxy :: _ "action1")
+
+_state2 = inj (Proxy :: _ "state2")
+
 tests' :: Unit
 tests' =
   fold
@@ -154,12 +170,6 @@ tests' =
           ]
     ]
 
-_state1 = inj (Proxy :: _ "state1")
-
-_state1_action1 = inj (Proxy :: _ "state1") <<< inj (Proxy :: _ "action1")
-
-_state2 = inj (Proxy :: _ "state2")
-
 tests :: T.TestSuite
 tests =
   T.suite "Stadium.Control" do
@@ -175,9 +185,14 @@ tests =
                   }
               }
 
-          myStateM :: State MyState Unit
-          myStateM = myControl modify_ (_state1 5) (_state1_action1 10)
-        A.equal (_state1 15) (execState myStateM myInit)
+          myAct :: MyAction -> StateT MyState Identity Unit
+          myAct = toStateT myControl
+
+          myStMonad = do
+            myAct $ _state1_action1 10
+            myAct $ _state1_action1 7
+            myAct $ _state1_action1 4
+        A.equal (_state1 21) (execState myStMonad myInit)
       T.test "setState as function" do
         let
           myControl :: forall m. Monad m => ((MyState -> MyState) -> m Unit) -> MyState -> MyAction -> m Unit
@@ -189,6 +204,11 @@ tests =
                   }
               }
 
-          myStateM :: State MyState Unit
-          myStateM = myControl modify_ (_state1 5) (_state1_action1 10)
-        A.equal (_state1 15) (execState myStateM myInit)
+          myAct :: MyAction -> StateT MyState Identity Unit
+          myAct = toStateT myControl
+
+          myStMonad = do
+            myAct $ _state1_action1 10
+            myAct $ _state1_action1 7
+            myAct $ _state1_action1 4
+        A.equal (_state1 21) (execState myStMonad myInit)
