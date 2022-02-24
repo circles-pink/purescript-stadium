@@ -2,7 +2,7 @@ module Test.Graph where
 
 import Prelude
 import Data.Variant (Variant)
-import Dot as D
+import Data.DotLang.Class as D
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (readTextFile, writeTextFile)
 import Stadium.Graph as G
@@ -54,6 +54,6 @@ tests =
             R.reflectStateMachine (Proxy :: _ MyStateMachine)
               # G.fromStateMachineData "MyGraph"
               # G.graphToDot
-              # D.toString
+              # D.toText
         writeTextFile UTF8 "test/golden/graph1-actual.dot" actual
         A.equal expected actual

@@ -1,9 +1,1 @@
-digraph "MyGraph" {
-  "state1" [shape=ellipse, label="state1"];
-  "state1__action1" [shape=box, label="action1"];
-  "state1__action2" [shape=box, label="action2"];
-  "state2" [shape=ellipse, label="state2"];
-  "state1" -> "state1__action1";
-  "state1" -> "state1__action2";
-  "state1__action2" -> "state2";
-}
+digraph {state1 [shape=ellipse, label="state1"]; state1__action1 [shape=box, label="action1"]; state1__action2 [shape=box, label="action2"]; state2 [shape=ellipse, label="state2"]; state1 -> state1__action1; state1 -> state1__action2; state1__action2 -> state2; }
