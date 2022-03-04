@@ -43,14 +43,11 @@ fromNode n =
   "  " <> show n.id
     <> " [shape="
     <> fromShape n.shape
-    <> ", "
-    <> "label="
+    <> ", label="
     <> show n.label
-    <> ", "
-    <> "width="
+    <> ", width="
     <> show (shapeWidth n.shape)
-    <> ", "
-    <> "height="
+    <> ", height="
     <> show (shapeHeight n.shape)
     <> "];\n"
 
@@ -67,4 +64,4 @@ shapeWidth s = case s of
 shapeHeight :: Shape -> Number
 shapeHeight s = case s of
   Box -> 0.25
-  Ellipse -> 0.5
+  Ellipse -> 0.75
