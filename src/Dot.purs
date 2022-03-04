@@ -46,9 +46,25 @@ fromNode n =
     <> ", "
     <> "label="
     <> show n.label
+    <> ", "
+    <> "width="
+    <> show (shapeWidth n.shape)
+    <> ", "
+    <> "height="
+    <> show (shapeHeight n.shape)
     <> "];\n"
 
 fromShape :: Shape -> String
 fromShape s = case s of
   Box -> "box"
   Ellipse -> "ellipse"
+
+shapeWidth :: Shape -> Number
+shapeWidth s = case s of
+  Box -> 0.5
+  Ellipse -> 1.0
+
+shapeHeight :: Shape -> Number
+shapeHeight s = case s of
+  Box -> 0.25
+  Ellipse -> 0.5
