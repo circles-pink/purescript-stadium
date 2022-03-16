@@ -23,5 +23,5 @@ in  upstream
       , "variant"
       ]
     , repo = "https://github.com/thought2/purescript-dot-language.git"
-    , version = "76abe9daa5370214f2733f45bd277d59a98e890c"
+    , version = "851080345c49aff1dc01c42e51b79b0d0074c6d2"
     }

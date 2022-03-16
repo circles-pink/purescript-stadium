@@ -36,7 +36,7 @@ fromNode n = case n of
       , attrs:
           [ D.label s.name
           , D.unsafeAttr "shape" "rectangle"
-          , D.unsafeAttr "style" "rounded, filled"
+          , D.unsafeAttr "style" "filled"
           , D.unsafeAttr "fontcolor" "white"
           , D.unsafeAttr "fillcolor" "#7776B8"
           ]
