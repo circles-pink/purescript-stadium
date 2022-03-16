@@ -4,7 +4,7 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
-import Dot as D
+import Language.Dot as D
 import Effect (Effect)
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync (writeTextFile)
@@ -108,5 +108,5 @@ main =
   R.reflectStateMachine (Proxy :: _ MyStateMachine)
     # G.fromStateMachineData "MyGraph"
     # G.graphToDot {entryPoint: Nothing }
-    # D.toString
+    # D.printGraph
     # writeTextFile UTF8 "example-dist/example-graph.dot"
