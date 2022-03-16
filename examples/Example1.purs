@@ -1,6 +1,8 @@
 module Example1 where
 
 import Prelude
+
+import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
 import Dot as D
 import Effect (Effect)
@@ -105,6 +107,6 @@ main :: Effect Unit
 main =
   R.reflectStateMachine (Proxy :: _ MyStateMachine)
     # G.fromStateMachineData "MyGraph"
-    # G.graphToDot
+    # G.graphToDot {entryPoint: Nothing }
     # D.toString
     # writeTextFile UTF8 "example-dist/example-graph.dot"

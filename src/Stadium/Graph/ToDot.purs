@@ -3,16 +3,38 @@ module Stadium.Graph.ToDot
   ) where
 
 import Prelude
+
+import Data.Array as A
+import Data.Maybe (Maybe(..))
 import Dot as D
+import Stadium.Graph.Type (Node(..))
 import Stadium.Graph.Type as G
 
-graphToDot :: G.Graph -> D.Dot
-graphToDot g =
+type Options = {
+  entryPoint:: Maybe String 
+}
+
+graphToDot :: Options -> G.Graph -> D.Dot
+graphToDot opt g =
   { name: g.name
-  , nodes: map fromNode g.nodes
+  , nodes: g.nodes # reorder' # map fromNode 
   , edges: map fromEdge g.edges
   }
+  where
+  reorder' = case opt.entryPoint of
+    Nothing -> identity
+    Just ep -> reorder ep 
+  
+reorder :: String -> Array Node -> Array Node
+reorder entryName xs = r.rest <> r.init
+  where
+  r = A.span (\n -> nodeToStateName n /= Just entryName) xs
 
+  nodeToStateName :: Node -> Maybe String
+  nodeToStateName n = case n of
+    State {name} -> Just name 
+    _ -> Nothing 
+  
 fromNode :: G.Node -> D.Node
 fromNode n = case n of
   G.State s ->
