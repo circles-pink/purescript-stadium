@@ -33,12 +33,24 @@ fromNode n = case n of
   G.State s ->
     D.NodeStmt
       { id: D.NodeId { id: D.Id s.name }
-      , attrs: [ D.label s.name ]
+      , attrs:
+          [ D.label s.name
+          , D.unsafeAttr "shape" "rectangle"
+          , D.unsafeAttr "style" "rounded, filled"
+          , D.unsafeAttr "fontcolor" "white"
+          , D.unsafeAttr "fillcolor" "#7776B8"
+          ]
       }
   G.Action s ->
     D.NodeStmt
       { id: D.NodeId { id: D.Id $ fromActionName s.name }
-      , attrs: [ D.label s.name.action ]
+      , attrs:
+          [ D.label s.name.action
+          , D.unsafeAttr "shape" "rectangle"
+          , D.unsafeAttr "height" "0.05"
+          , D.unsafeAttr "width" "0.05"
+          , D.unsafeAttr "fontsize" "5"
+          ]
       }
 
 fromEdge :: G.Edge -> D.EdgeStmt
@@ -48,13 +60,13 @@ fromEdge n = case n of
       (D.nodeId $ D.NodeId { id: D.Id $ fromActionName s.fromAction })
       (D.nodeId $ D.NodeId { id: D.Id s.toState })
       []
-      []
+      [ D.unsafeAttr "arrowsize" "0.5" ]
   G.ToAction s ->
     D.EdgeStmt
       (D.nodeId $ D.NodeId { id: D.Id s.fromState })
       (D.nodeId $ D.NodeId { id: D.Id $ fromActionName s.toAction })
       []
-      []
+      [ D.unsafeAttr "arrowsize" "0.5" ]
 
 fromActionName :: G.ActionName -> String
 fromActionName a = a.state <> "__" <> a.action
