@@ -49,7 +49,7 @@ fromNode n = case n of
           , D.unsafeAttr "shape" "rectangle"
           , D.unsafeAttr "height" "0.05"
           , D.unsafeAttr "width" "0.05"
-          , D.unsafeAttr "fontsize" "5"
+          , D.unsafeAttr "fontsize" "8"
           ]
       }
 
