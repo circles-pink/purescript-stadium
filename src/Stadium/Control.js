@@ -7,7 +7,7 @@ exports.mkControlImpl = function (spec) {
                         if (x.type === st.type) {
                             return f(x.value)
                         } else {
-                            console.log("Dropping state update")
+                            console.log(`Dropping state update: Action ${ac.value.type} triggered from state ${st.type} but received in state ${x.type} with the following data: `, ac.value.value)
                             return x
                         }
                     }
