@@ -8,7 +8,7 @@ exports.mkControlImpl = function (spec) {
                             return f(x.value)
                         } else {
                             console.log("Dropping state update")
-                            return x.value
+                            return x
                         }
                     }
                     
