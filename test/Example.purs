@@ -1,58 +1,61 @@
 module Test.Example where
 
 import Prelude
-import Stadium.Type
 
-import Data.Newtype (class Newtype, unwrap)
-import Data.Tuple.Nested (type (/\))
-import Data.Variant (Variant, inj, match, onMatch)
-import Stadium.Control (class Control, class GetControl, class GetOriginState, class GetTargetState)
-import Stadium.Util (type (#))
-import Type.Equality (class TypeEquals)
-import Type.Map (Empty, Insert)
+import Data.Variant (Variant, inj)
+import Stadium.Type.Spec as SP
+import Type.Data.List (type (:>), Nil')
 import Type.Proxy (Proxy(..))
-import Undefined (undefined)
 
 -- import Undefined (undefined)
 
-type MyStateMachine =
-  MkStateMachine
-    ( Empty
-        # Insert (MkStateName "on")
-            ( MkState
-                (MkStateType Unit)
-                ( MkStateActions
-                    ( Empty
-                        # Insert (MkActionName "turnOff")
-                            ( MkAction
-                                (MkActionType Unit)
-                                ( MkTargets
-                                    # AddTarget (MkTarget (MkStateName "off"))
+type Spec = SP.MkStateMachineSpec
+  ( "on" ::
+      SP.MkState Unit
+        ( "turnOff" :: SP.MkAction Unit ("off" :> Nil')
+        , "toggle" :: SP.MkAction Unit ("on" :> "off" :> Nil')
+        )
+  , "off" ::
+      SP.MkState Unit
+        ("turnOn" :: SP.MkAction Unit ("on" :> Nil'))
+  )
 
-                                )
-                            )
-                    )
+-- type MyStateMachine =
+--   MkStateMachine
+--     ( Empty
+--         # Insert (MkStateName "on")
+--             ( MkState
+--                 (MkStateType Unit)
+--                 ( MkStateActions
+--                     ( Empty
+--                         # Insert (MkActionName "turnOff")
+--                             ( MkAction
+--                                 (MkActionType Unit)
+--                                 ( MkTargets
+--                                     (Nil' # Cons' (MkStateName "off"))
+--                                 )
+--                             )
+--                     )
 
-                )
-            )
-        # Insert (MkStateName "off")
-            ( MkState
-                (MkStateType Unit)
-                ( MkStateActions
-                    ( Empty
-                        # Insert (MkActionName "turnOn")
-                            ( MkAction
-                                (MkActionType Unit)
-                                ( MkTargets
-                                    # AddTarget (MkTarget (MkStateName "on"))
+--                 )
+--             )
+--         # Insert (MkStateName "off")
+--             ( MkState
+--                 (MkStateType Unit)
+--                 ( MkStateActions
+--                     ( Empty
+--                         # Insert (MkActionName "turnOn")
+--                             ( MkAction
+--                                 (MkActionType Unit)
+--                                 ( MkTargets
+--                                     (Nil' # Cons' (MkStateName "on"))
+--                                 )
+--                             )
+--                     )
 
-                                )
-                            )
-                    )
-
-                )
-            )
-    )
+--                 )
+--             )
+--     )
 
 -- type MyStateMachine =
 --   MkStateMachine
@@ -86,14 +89,74 @@ turnOn = inj (Proxy :: _ "turnOn")
 turnOff :: forall r. Unit -> Variant (turnOff :: Unit | r)
 turnOff = inj (Proxy :: _ "turnOff")
 
-_stm = (Proxy :: _ MyStateMachine)
+on :: forall r. Unit -> Variant (on :: Unit | r)
+on = inj (Proxy :: _ "on")
+
+off :: forall r. Unit -> Variant (off :: Unit | r)
+off = inj (Proxy :: _ "off")
+
+--_stm = (Proxy :: _ MyStateMachine)
 
 --------------------------------------------------------------------------------
 
---------------------------------------------------------------------------------
+-- data Res :: StateMachine -> StateName -> ActionName -> (Type -> Type) -> Type -> Type
+-- data Res stm sn an m a = Res (Proxy stm) (Proxy sn) (Proxy an) (Proxy m) a
 
-instance my :: GetControl stm sn an f => Control Tag stm sn an where
-  control _ _ = undefined :: f
+-- type Res' :: StateMachine -> StateName -> ActionName -> Type -> Type
+-- type Res' stm sn an a = a
+
+-- type TControlHandler orSt taSt st ac m = ((Variant orSt -> Variant taSt) -> m Unit) -> st -> ac -> m Unit
+
+-- class ControlHandler :: StateMachine -> StateName -> ActionName -> (Type -> Type) -> Type -> Constraint
+-- class ControlHandler stm sn an m f | stm sn an -> f
+
+-- type Ac = Unit
+
+-- instance controlHandler ::
+--   ( GetState stm st
+--   , GetOriginState stm sn orSt
+--   , GetTargetState stm sn an taSt
+--   , Monad m
+--   ) =>
+--   ControlHandler stm sn an m (((Variant orSt -> Variant taSt) -> m Unit) -> Variant st -> Ac -> m Unit)
+
+-- mkControl
+--   :: forall stm sn an st orSt taSt m
+--    . GetState stm st
+--   => GetOriginState stm sn orSt
+--   => GetTargetState stm sn an taSt
+--   => Monad m
+--   => (((Variant orSt -> Variant taSt) -> m Unit) -> Variant st -> Ac -> m Unit)
+--   -> T stm sn an m
+-- mkControl f = undefined
+
+-- --------------------------------------------------------------------------------
+
+-- type T :: StateMachine -> StateName -> ActionName -> (Type -> Type) -> Type
+-- type T stm sn an m = forall f. ControlHandler stm sn an m f => Res stm sn an m f
+
+-- control_on_turnOff :: forall m. Monad m => T MyStateMachine (MkStateName "on") (MkActionName "turnOff") m
+-- control_on_turnOff = mkControl f
+--   where
+--   f set _ st = do
+--     set (\s -> off unit)
+--     pure unit
+
+-- control_off_turnOn :: forall m. Monad m => T MyStateMachine (MkStateName "off") (MkActionName "turnOn") m
+-- control_off_turnOn = mkControl f
+--   where
+--   f set _ st = do
+--     set (\s -> s)
+--     pure unit
+
+-- control =
+--   { on:
+--       { turnOff: control_on_turnOff
+--       }
+--   , off:
+--       { turnOn: control_off_turnOn
+--       }
+--   }
 
 --------------------------------------------------------------------------------
 
