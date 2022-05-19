@@ -1,25 +1,5 @@
-module Stadium.Type.Spec where
+module Stadium.Type.Spec (module Exp) where
 
-import Prelude
-
-import Type.Data.List (List')
-
---------------------------------------------------------------------------------
-
-data StateMachineSpec
-
-foreign import data MkStateMachineSpec :: Row State -> StateMachineSpec
-
---------------------------------------------------------------------------------
-
-data State
-
-foreign import data MkState :: Type -> Row Action -> State
-
---------------------------------------------------------------------------------
-
-data Action
-
-foreign import data MkAction :: Type -> List' Symbol -> Action
-
---------------------------------------------------------------------------------
+import Stadium.Type.Spec.StateMachine as Exp
+import Stadium.Type.Spec.State as Exp
+import Stadium.Type.Spec.Action as Exp

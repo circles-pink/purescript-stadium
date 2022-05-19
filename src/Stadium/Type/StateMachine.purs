@@ -1,6 +1,8 @@
 module Stadium.Type.StateMachine
   ( MkStateMachine
   , StateMachine(..)
+  , StateMap
+  , class FromMap
   , class GetState
   , tests
   ) where
@@ -30,14 +32,23 @@ import Type.Test (Test3, test3)
 
 data StateMachine
 
-foreign import data MkStateMachine :: Map StateName State -> StateMachine
+type StateMap = Map StateName State
+
+foreign import data MkStateMachine :: StateMap -> StateMachine
 
 --------------------------------------------------------------------------------
 
-class GetMap :: StateMachine -> Map StateName State -> Constraint
+class GetMap :: StateMachine -> StateMap -> Constraint
 class GetMap stm m | stm -> m
 
 instance getMap :: GetMap (MkStateMachine m) m
+
+--------------------------------------------------------------------------------
+
+class FromMap :: StateMap -> StateMachine -> Constraint
+class FromMap m stm | m -> stm
+
+instance fromMap :: FromMap m (MkStateMachine m)
 
 --------------------------------------------------------------------------------
 
