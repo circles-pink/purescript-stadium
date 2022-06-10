@@ -6,11 +6,12 @@ module Stadium.Control
   , class MkControl
   , mkControl
   , tests
+  , toMonadState
   , toStateT
   ) where
 
 import Prelude
-import Control.Monad.State (State, StateT(..), execState, get, modify_, put)
+import Control.Monad.State (class MonadState, State, StateT(..), execState, get, modify_, put)
 import Data.Array (fold)
 import Data.Identity (Identity(..))
 import Data.Variant (Variant, inj)
@@ -109,6 +110,11 @@ class MkControl stm ctlS ctl | stm -> ctl ctlS where
 --------------------------------------------------------------------------------
 toStateT :: forall st ac m. Monad m => Control st ac (StateT st m) -> ac -> StateT st m Unit
 toStateT ctl ac = do
+  st <- get
+  ctl modify_ st ac
+
+toMonadState :: forall st ac m. MonadState st m => Control st ac m -> ac -> m Unit
+toMonadState ctl ac = do
   st <- get
   ctl modify_ st ac
 
