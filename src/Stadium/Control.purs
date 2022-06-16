@@ -93,9 +93,10 @@ instance mkControl' ::
   , FailOnLeft r
   , TypeEquals stm (StateMachine ptc st ac)
   , GenControlSpec m stm ctlS
+  , Applicative m
   ) =>
   MkControl stm ctlS o where
-  mkControl _ = mkControlImpl
+  mkControl _ = mkControlImpl ((\st -> pure st) :: forall a. a -> m a)
 
 foreign import mkControlImpl :: forall a. a
 

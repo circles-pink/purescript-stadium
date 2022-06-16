@@ -1,4 +1,4 @@
-exports.mkControlImpl = function (spec) {
+exports.mkControlImpl = (skip) => function (spec) {
   return function (setState) {
     return function (st) {
       return function (ac) {
@@ -26,7 +26,7 @@ exports.mkControlImpl = function (spec) {
           console.log(
             `WARNING: Action ${ac.type}/${ac.value.type} was triggered from state ${st.type}`
           );
-          return st.value;
+          return skip(st);
         }
 
         return spec[ac.type][ac.value.type](setState_)(st.value)(
